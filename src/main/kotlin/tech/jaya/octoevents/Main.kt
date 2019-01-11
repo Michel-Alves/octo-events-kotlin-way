@@ -4,28 +4,48 @@ import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.*
 import org.eclipse.jetty.http.HttpHeader
 import org.eclipse.jetty.http.HttpStatus
+import tech.jaya.octoevents.controller.IssueControllerImpl
+import tech.jaya.octoevents.controller.IssuesEventRestContract
+import tech.jaya.octoevents.model.IssueEvent
+import tech.jaya.octoevents.service.IssueServiceImpl
+
+val issueController: IssuesEventRestContract = IssueControllerImpl(IssueServiceImpl())
 
 fun main() {
     val app = Javalin.create().start(8080)
 
-    // POST /issues and GET /issues/{id}/events
     app.routes {
+
         path("/issues") {
+
             post {
-                // TODO: Qual a forma kotlin way de obter enums http sem depender da lib do jetty?
-                /*
-                   Teste:
-                   $ curl -X POST -d '{}' 'http://localhost:8080/issues' -v
-                 */
+
+                val issueEvent = it.validatedBody<IssueEvent>()
+                        .getOrThrow()
+                val eventId = issueController
+                        .registerNewIssueEvent(issueEvent)
+
+                // TODO: Qual a forma kotlin de obter enums http sem depender da lib do jetty?
                 it.status(HttpStatus.CREATED_201)
                     .header(HttpHeader.LOCATION.name,
-                            "/issues/1000/events")
+                            "/issues/$eventId/events")
             }
-            path("/:idissue/events") {
+
+            path("/:issuenumber/events") {
+
                 get {
-                    it.json("{\"msg\": \"ok\"}").status(HttpStatus.OK_200)
+                    val issueNumber = it.validatedPathParam("issuenumber")
+                            .notNullOrEmpty()
+                            .asLong()
+                            .getOrThrow()
+
+                    it.json(issueController
+                            .getEvents(issueNumber))
+                            .status(HttpStatus.OK_200)                          
                 }
+
             }
+
         }
     }
 }
