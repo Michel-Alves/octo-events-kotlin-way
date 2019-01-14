@@ -1,51 +1,40 @@
 package tech.jaya.octoevents
 
 import io.javalin.Javalin
-import io.javalin.apibuilder.ApiBuilder.*
-import org.eclipse.jetty.http.HttpHeader
-import org.eclipse.jetty.http.HttpStatus
-import tech.jaya.octoevents.controller.IssueControllerImpl
-import tech.jaya.octoevents.controller.IssuesEventRestContract
-import tech.jaya.octoevents.model.IssueEvent
-import tech.jaya.octoevents.service.IssueServiceImpl
+import org.koin.standalone.StandAloneContext
+import tech.jaya.octoevents.application.OctoEventsApplication
+import tech.jaya.octoevents.config.octoEventsMudule
 
-val issueController: IssuesEventRestContract = IssueControllerImpl(IssueServiceImpl())
+val DEFAULT_PORT = 8080
 
-fun main() {
-    val app = Javalin.create().start(8080)
+// TODO: Tem alguma lib nativa para CLI ?
+fun main(vararg args: String) {
 
-    app.routes {
-
-        path("/issues") {
-
-            post {
-
-                val issueEvent = it.validatedBody<IssueEvent>()
-                        .getOrThrow()
-                val eventId = issueController
-                        .registerNewIssueEvent(issueEvent)
-
-                // TODO: Qual a forma kotlin de obter enums http sem depender da lib do jetty?
-                it.status(HttpStatus.CREATED_201)
-                    .header(HttpHeader.LOCATION.name,
-                            "/issues/$eventId/events")
-            }
-
-            path("/:issuenumber/events") {
-
-                get {
-                    val issueNumber = it.validatedPathParam("issuenumber")
-                            .notNullOrEmpty()
-                            .asLong()
-                            .getOrThrow()
-
-                    it.json(issueController
-                            .getEvents(issueNumber))
-                            .status(HttpStatus.OK_200)                          
-                }
-
-            }
-
+    var port: Int
+    // TODO: Loggar
+    // TODO: Validar range de porta
+    // TODO: Com certeza tem um jeito mais simples de fazer com Kotlin
+    if(args.isNotEmpty()) {
+        // try expressions
+        try {
+            port = args.get(0)?.toInt()
+        } catch (e: NumberFormatException) {
+            println("Port as ${args.get(0)} not allowed")
+        } finally {
+            port = DEFAULT_PORT
         }
+    } else {
+        port = DEFAULT_PORT
     }
+
+    StandAloneContext.startKoin(listOf(octoEventsMudule))
+
+    val javalinInstance =
+            Javalin.create()
+                    .start(port)
+
+    val app = OctoEventsApplication(javalinInstance)
+
+    app.initResourceControllers()
+
 }
