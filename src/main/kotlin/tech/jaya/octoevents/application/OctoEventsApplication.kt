@@ -24,8 +24,8 @@ class OctoEventsApplication(val javalinInstance: Javalin) : KoinComponent {
 
                 post {
 
-                    val issueEvent = it.validatedBody<IssueEvent>()
-                            .getOrThrow()
+                    //val issueEvent = it.validatedBody<IssueEvent>().getOrThrow()
+                    val issueEvent = it.body<IssueEvent>()
                     val eventId = issueController
                             .registerNewIssueEvent(issueEvent)
 

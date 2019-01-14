@@ -2,13 +2,13 @@ package tech.jaya.octoevents.service
 
 import tech.jaya.octoevents.exception.BussinessExeption
 import tech.jaya.octoevents.model.IssueEvent
-import java.lang.IllegalArgumentException
+import tech.jaya.octoevents.repository.CrudIssueEventRepository
 
-class IssueServiceImpl : IssueService {
+class IssueServiceImpl(val issueRepository: CrudIssueEventRepository) : IssueService {
 
-    override fun push(issueEvent: IssueEvent): Int {
+    override fun push(issueEvent: IssueEvent): Int? {
         validateIssueEvent(issueEvent)
-        return 0
+        return issueRepository.save(issueEvent)
     }
 
     // TODO: Internacionalização
@@ -20,7 +20,7 @@ class IssueServiceImpl : IssueService {
             (id == null) ->
                 throw BussinessExeption(message,
                         IllegalArgumentException("The field id is not nullable"))
-            (id < 0) ->
+            (id.value < 0) ->
                 throw BussinessExeption(message,
                         IllegalArgumentException("The field id is ivalid"))
             else -> return@with

@@ -4,8 +4,8 @@ buildscript {
     ext.slf4j_version = '1.7.25'
     ext.jackson_kotlin = '2.9.4.1'
     ext.koin_version = '1.0.2'
-
-    //ext.exposed_version = '0.11.2'
+    ext.exposed_version = '0.11.2'
+    ext.h2_version = '1.4.197'
 
     //ext.junit_version = '5.0.3'
 
@@ -45,8 +45,10 @@ dependencies {
     implementation "com.fasterxml.jackson.module:jackson-module-kotlin:$jackson_kotlin"
 
     implementation "org.koin:koin-core:$koin_version"
-    testCompile "org.koin:koin-test:$koin_version"
+    //testCompile "org.koin:koin-test:$koin_version"
 
-    // compile "org.jetbrains.exposed:$exposed_version"
+    implementation "org.jetbrains.exposed:exposed:$exposed_version"
+
+    implementation "com.h2database:h2:$h2_version"
     // testCompile 'org.junit.jupiter:junit-jupiter-api:junit_version'
 }

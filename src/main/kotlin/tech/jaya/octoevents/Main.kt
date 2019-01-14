@@ -1,9 +1,15 @@
 package tech.jaya.octoevents
 
 import io.javalin.Javalin
+import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.StdOutSqlLogger
+import org.jetbrains.exposed.sql.addLogger
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.standalone.StandAloneContext
 import tech.jaya.octoevents.application.OctoEventsApplication
 import tech.jaya.octoevents.config.octoEventsMudule
+import tech.jaya.octoevents.repository.dao.IssueEventDAO
 
 val DEFAULT_PORT = 8080
 
@@ -35,6 +41,21 @@ fun main(vararg args: String) {
 
     val app = OctoEventsApplication(javalinInstance)
 
+    initDatabase()
+
     app.initResourceControllers()
 
+}
+
+fun initDatabase() {
+
+    Database.connect("jdbc:h2:mem:test", driver = "org.h2.Driver")
+
+    transaction {
+        // Irá printar SQL para std-out
+        addLogger(StdOutSqlLogger)
+
+        // Criando as tabelas se não existirem
+        SchemaUtils.create(IssueEventDAO)
+    }
 }
