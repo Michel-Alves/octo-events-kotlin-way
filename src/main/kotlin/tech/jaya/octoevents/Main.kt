@@ -8,8 +8,8 @@ import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.standalone.StandAloneContext
 import tech.jaya.octoevents.application.OctoEventsApplication
+import tech.jaya.octoevents.config.IssueEventTable
 import tech.jaya.octoevents.config.octoEventsMudule
-import tech.jaya.octoevents.repository.dao.IssueEventDAO
 
 val DEFAULT_PORT = 8080
 
@@ -35,13 +35,14 @@ fun main(vararg args: String) {
 
     StandAloneContext.startKoin(listOf(octoEventsMudule))
 
+    initDatabase()
+
     val javalinInstance =
             Javalin.create()
                     .start(port)
 
     val app = OctoEventsApplication(javalinInstance)
 
-    initDatabase()
 
     app.initResourceControllers()
 
@@ -50,12 +51,14 @@ fun main(vararg args: String) {
 fun initDatabase() {
 
     Database.connect("jdbc:h2:mem:test", driver = "org.h2.Driver")
+    //SchemaUtils.create(IssueEventTable)
 
-    transaction {
+
+    /*transaction {
         // Irá printar SQL para std-out
         addLogger(StdOutSqlLogger)
 
         // Criando as tabelas se não existirem
-        SchemaUtils.create(IssueEventDAO)
-    }
+        SchemaUtils.create(IssueEventTable)
+    }*/
 }

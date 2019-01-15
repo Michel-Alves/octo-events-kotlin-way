@@ -5,9 +5,7 @@ import io.javalin.apibuilder.ApiBuilder.*
 import org.eclipse.jetty.http.HttpHeader
 import org.eclipse.jetty.http.HttpStatus
 import org.koin.standalone.KoinComponent
-import org.koin.standalone.StandAloneContext.startKoin
 import org.koin.standalone.inject
-import tech.jaya.octoevents.config.octoEventsMudule
 import tech.jaya.octoevents.controller.IssuesEventRestContract
 import tech.jaya.octoevents.model.IssueEvent
 
@@ -24,8 +22,7 @@ class OctoEventsApplication(val javalinInstance: Javalin) : KoinComponent {
 
                 post {
 
-                    //val issueEvent = it.validatedBody<IssueEvent>().getOrThrow()
-                    val issueEvent = it.body<IssueEvent>()
+                    val issueEvent = it.validatedBody<IssueEvent>().getOrThrow()
                     val eventId = issueController
                             .registerNewIssueEvent(issueEvent)
 
